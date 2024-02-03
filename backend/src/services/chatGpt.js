@@ -1,10 +1,8 @@
 const axios = require('axios');
 
 module.exports = {
-  askChatGpt: async ({}) => {
-    const prompt = 'who is adolf hitler?';
-    const openaiApiKey = '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'; // Replace with your actual OpenAI API key
-
+  askChatGpt: async ({ bodyData }) => {
+    const { prompt } = bodyData;
     const openaiResponse = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -18,11 +16,13 @@ module.exports = {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${openaiApiKey}`,
+          Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
         },
-        //   responseType: 'stream',
       }
     );
-    console.log(openaiResponse.data);
+    if (openaiResponse && openaiResponse.data) {
+      return { ok: true, data: openaiResponse.data.choices[0].message.content };
+    }
+    return { ok: false, err: `Chat Gpt didn't respond` };
   },
 };
