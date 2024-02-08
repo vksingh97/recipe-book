@@ -87,7 +87,7 @@ const RecipeBookBody = () => {
           <RecipeBookResponse>{recipeResponse}</RecipeBookResponse>
         </RecipeBookResponseContainer>
         <RecipeBookImageContainer>
-          {recipeImage && (
+          {recipeResponse && (
             <RecipeBookResponseImage
               src={recipeImage}
               alt='recipe'
