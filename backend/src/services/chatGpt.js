@@ -1,28 +1,33 @@
 const axios = require('axios');
+const { chatGptCompletionApi, chatGptDalleApi } = require('../utils/apiDict');
 
 module.exports = {
   askChatGpt: async ({ bodyData }) => {
     const { prompt } = bodyData;
-    const openaiResponse = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
-        },
+    try {
+      const [openaiResponse, chatGptDalleResponse] = await Promise.all([
+        chatGptCompletionApi({ prompt, model: 'gpt-3.5-turbo' }),
+        chatGptDalleApi({ prompt, model: 'dall-e-2' }),
+      ]);
+
+      if (
+        openaiResponse &&
+        openaiResponse.data &&
+        chatGptDalleResponse &&
+        chatGptDalleResponse.data
+      ) {
+        return {
+          ok: true,
+          data: {
+            promptResponse: openaiResponse.data.choices[0].message.content,
+            imageUrl: chatGptDalleResponse.data.data[0].url,
+          },
+        };
       }
-    );
-    if (openaiResponse && openaiResponse.data) {
-      return { ok: true, data: openaiResponse.data.choices[0].message.content };
+      return { ok: false, err: `Chat Gpt didn't respond` };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, err: 'An error occurred' };
     }
-    return { ok: false, err: `Chat Gpt didn't respond` };
   },
 };

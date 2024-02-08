@@ -5,7 +5,7 @@ const path = require('path');
 const reponseHandlers = require('./middlewares/response');
 
 const app = express();
-const port = 6000; // Set your desired port number
+const port = process.env.PORT; // Set your desired port number
 
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.text({ limit: '25mb' }));
